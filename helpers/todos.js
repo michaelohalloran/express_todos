@@ -25,7 +25,7 @@ exports.updateTodo = (req,res)=> {
 };
 
 exports.deleteTodo = (req,res)=> {
-    db.Todo.remove({_id: req.params.todoId})
+    db.Todo.deleteOne({_id: req.params.todoId})
     .then(() => res.json({msg: 'Deleted todo'}))
     .catch(err => res.send(err));
 };

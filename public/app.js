@@ -24,28 +24,21 @@ function createListItem(item, itemId) {
     let text = item.name ? document.createTextNode(item.name) : null;
     listItem.appendChild(text);
     addDoneListener(listItem);
-    //make and append deleteBtn
-    let deleteBtn = makeDomElement('button');
-    addDeleteListener(deleteBtn);
-    deleteBtn.innerHTML = 'Delete';
-    listItem.appendChild(deleteBtn);
+    //add class for styles
+    listItem.classList.add('task');
+    //make and append delete span
+    let deleteX = makeDomElement('span');
+    addDeleteListener(deleteX);
+    deleteX.innerHTML = 'X';
+    listItem.appendChild(deleteX);
     return listItem;
 }
 
 
 const addDbTodos = (todos) => {
-    console.log('todos: ', todos);
+    // console.log('todos: ', todos);
     todos.map(todo=> {
-        //create li for each todo name
-        // let dbTodo = document.createElement('LI');
-        // let text = document.createTextNode(todo.name);
-        // let deleteBtn = document.createElement('button');
-        // addDeleteListener(deleteBtn);
-        // deleteBtn.innerHTML = 'Delete';
-        // dbTodo.appendChild(text);
-        // dbTodo.appendChild(deleteBtn);
-        // console.log('dbTodo: ', dbTodo);
-        //if the todo is completed, add a "done" class for strikethrough styles
+        //create li for each todo
         let dbTodo = createListItem(todo, todo._id);
         //if todo is completed, add done styling
         todo.completed && dbTodo.classList.add('done');
@@ -56,8 +49,6 @@ const addDbTodos = (todos) => {
     //ALTERNATIVE:
 
     // todos.map(todo => {
-    //     //get ul
-    //     const list = document.getElementsByClassName('list')[0];
     //     //add lis with each todo and strikethrough (conditionally)
     //     list.innerHTML += `<li class="task ${todo.completed && 'done'}">${todo.name}</li>`;
     // })
@@ -98,10 +89,33 @@ function addNewTodo(e) {
 function addDoneListener(todo) {
     todo.addEventListener('click', e => {
         console.log('clicked todo from addDoneListener', e.target);
+        console.dir(e.target);
+        //update the view w/ strike-through
         e.target.classList.toggle('done');
+
+        //update completed boolean status in DB
+        updateTodo(e.target, e.target.id);
     })
 }
 
+function updateTodo(todo, id) {
+    console.log('todo data clicked: ', todo);
+    const updates = {
+        method: 'put',
+        headers:{
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({completed: true}),
+    }
+    fetch(`${baseUrl}/${id}`, updates)
+    .then(res => res.json())
+    .then(updatedTodo => console.log('updatedTodo: ', updatedTodo))
+    .catch(err => console.log('Update error: ', err));
+}
+
+
+//********************************************* */
+//DELETE FUNCTIONALITY
 //fire deleteTodo when clicking deleteBtn for a todo
 function addDeleteListener(btn) {
     btn.addEventListener('click', e => {
@@ -113,6 +127,7 @@ function addDeleteListener(btn) {
     })
 }
 
+//remove todo from DB
 function deleteTodo(todo, todoId) {
     // console.log('todo id: ', todo.id);
     fetch(`${baseUrl}/${todoId}`, {
